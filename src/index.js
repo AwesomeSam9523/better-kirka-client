@@ -1,4 +1,4 @@
-const {app, BrowserWindow, clipboard} = require('electron');
+const {app, BrowserWindow, clipboard, session} = require('electron');
 const shortcuts = require('electron-localshortcut');
 
 app.commandLine.appendSwitch('disable-frame-rate-limit');
@@ -50,6 +50,31 @@ const createWindow = () => {
         //win.webContents.openDevTools();
     });
 
+    /*try {
+        win.webContents.debugger.attach('1.3');
+    } catch (err) {
+        console.log('Debugger attach failed: ', err);
+    }
+
+    win.webContents.debugger.on('detach', (event, reason) => {
+        console.log('Debugger detached due to: ', reason);
+    });
+
+    win.webContents.debugger.on('message', (event, method, params) => {
+        if (method === 'Network.responseReceived') {
+            if (params.response.url === 'https://api.kirka.io/api/inventory') {
+                console.log(params.response.url);
+
+
+                win.webContents.debugger.sendCommand('Network.getResponseBody', {requestId: params.requestId}).then((response) => {
+                    response = [];
+                    console.log(response[0]);
+                });
+            }
+        }
+    })
+
+    win.webContents.debugger.sendCommand('Network.enable');*/
 
 
 }

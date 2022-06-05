@@ -9,9 +9,13 @@ let hideArms = false;
 let playerHighLight = true;
 let fullBlack = false;
 let wireframe = false;
+let prevWireframe = false;
 let rainbow = false;
 
 let inspecting = false;
+let prevInsp = false;
+let prevInspectPos;
+let prevInspectRot;
 
 let scene;
 
@@ -35,6 +39,67 @@ new MutationObserver(mutationRecords => {
             record.addedNodes.forEach(el => {
                 if (el.classList?.contains("loading-scene") && noLoadingTimes) el.parentNode.removeChild(el);
                 if (el.id === "cmpPersistentLink") el.parentNode.removeChild(el);
+                if (el.classList?.contains("settings")) {
+
+                    let elem = document.createElement('div');
+                    elem.classList.add("text-2", "tab");
+                    elem.innerText = "Client";
+                    elem.dataset.vC835fc7a = "";
+
+                    document.getElementsByClassName("tabs")[0].appendChild(elem);
+                }
+                if (el.classList?.contains("moneys")) {
+                    let btn = document.createElement("button");
+                    btn.classList.add("animation");
+
+
+                    btn.style = "background-color: var(--primary-1);\n" +
+                        "    --hover-color: var(--primary-2);\n" +
+                        "    --top: var(--primary-2);\n" +
+                        "    --bottom: var(--primary-3);" +
+                        "    display: flex;\n" +
+                        "    justify-content: center;\n" +
+                        "    align-items: center;\n" +
+                        "    border: none;\n" +
+                        "    position: absolute;\n" +
+                        "    color: var(--white);\n" +
+                        "    font-size: 1rem;\n" +
+                        "    transition: all .3s ease;\n" +
+                        "    font-family: Rowdies;\n" +
+                        "    padding: .9em 1.4em;\n" +
+                        "    transform: skew(-10deg);\n" +
+                        "    font-weight: 900;\n" +
+                        "    overflow: hidden;\n" +
+                        "    text-transform: uppercase;\n" +
+                        "    border-radius: .2em;\n" +
+                        "    outline: none;\n" +
+                        "    text-shadow: 0 0.1em 0 #000;\n" +
+                        "    -webkit-text-stroke: 1px var(--black);\n" +
+                        "    box-shadow: 0 0.15rem 0 rgba(0,0,0,.315);\n" +
+                        "    cursor: pointer;" +
+                        "    box-shadow: 0 5.47651px 0 rgba(0,0,0,.5)!important;\n" +
+                        "    text-shadow: -1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 3px 1px rgba(0,0,0,.486)!important;" +
+                        "    width: 150px;" +
+                        "    height: 50px;" +
+                        "    bottom: 0px;" +
+                        "    right: 100%;" +
+                        "    margin-right: 10px;" +
+                        "    font-size: 20px;";
+
+
+                    btn.innerText = "Join Link";
+
+                    btn.onclick = () => {
+                        window.open(clipboard.readText());
+                    }
+
+                    document.getElementsByClassName('play-content')[0].append(btn);
+
+                    document.getElementsByClassName('card-cont soc-group')[1].onclick = () => {
+                        window.open("https://www.youtube.com/watch?v=Vmf5evAwScc");
+                    };
+
+                }
                 if (el.classList?.contains("game-interface")) {
                     crosshair = document.getElementById("crosshair-static");
                     let hpElem = document.getElementsByClassName("hp-progress")[0];
@@ -69,53 +134,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.head.append(cssLinkElem);
     }
 
-    let btn = document.createElement("button");
-    btn.classList.add("animation");
-
-
-    btn.style = "background-color: var(--primary-1);\n" +
-        "    --hover-color: var(--primary-2);\n" +
-        "    --top: var(--primary-2);\n" +
-        "    --bottom: var(--primary-3);" +
-        "    display: flex;\n" +
-        "    justify-content: center;\n" +
-        "    align-items: center;\n" +
-        "    border: none;\n" +
-        "    position: absolute;\n" +
-        "    color: var(--white);\n" +
-        "    font-size: 1rem;\n" +
-        "    transition: all .3s ease;\n" +
-        "    font-family: Rowdies;\n" +
-        "    padding: .9em 1.4em;\n" +
-        "    transform: skew(-10deg);\n" +
-        "    font-weight: 900;\n" +
-        "    overflow: hidden;\n" +
-        "    text-transform: uppercase;\n" +
-        "    border-radius: .2em;\n" +
-        "    outline: none;\n" +
-        "    text-shadow: 0 0.1em 0 #000;\n" +
-        "    -webkit-text-stroke: 1px var(--black);\n" +
-        "    box-shadow: 0 0.15rem 0 rgba(0,0,0,.315);\n" +
-        "    cursor: pointer;" +
-        "    box-shadow: 0 5.47651px 0 rgba(0,0,0,.5)!important;\n" +
-        "    text-shadow: -1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 3px 1px rgba(0,0,0,.486)!important;" +
-        "    width: 150px;" +
-        "    height: 50px;" +
-        "    bottom: 0px;" +
-        "    right: 100%;" +
-        "    margin-right: 10px;" +
-        "    font-size: 20px;"
-
-
-    btn.innerText = "Join Link"
-
-    btn.onclick = () => {
-        window.open(clipboard.readText());
-    }
-
-    document.getElementsByClassName('play-content')[0].append(btn)
-
-
 });
 
 
@@ -145,6 +163,10 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'j') {
         inspecting = true;
     }
+
+    if (e.key === 'k') {
+        wireframe = !wireframe;
+    }
 });
 
 document.addEventListener('keyup', (e) => {
@@ -159,7 +181,6 @@ let b = 0;
 
 function animate() {
     window.requestAnimationFrame(animate);
-    console.log(inspecting)
     if (rainbow) {
         if (r > 0 && b === 0) {
             r--;
@@ -193,11 +214,10 @@ function animate() {
 
         if (weap === "Weatie" || weap === "MAC-10") num = 5;
 
-        if (weap === "AR-9") num = 5;
-
+        if (weap === "AR-9") num = 3;
 
         let arms = true;
-        if ((scoped && hideWeaponsAds) || hideArms) {
+        if ((scoped && hideWeaponsAds) || hideArms || inspecting) {
             arms = false;
         }
 
@@ -205,26 +225,29 @@ function animate() {
 
         if (hideWeaponsAds) scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"]["visible"] = !scoped;
 
-        //console.log(scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num].rotation.x, scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num].rotation.y, scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num].rotation.z)
-        // scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num].rotation.x = 10
-        // console.log(scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.x, scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.y, scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.z)
-
         if (inspecting) {
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.x = 0
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.y = -0.3
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.z = -0.4
+            if (!prevInsp) {
+                prevInspectPos = scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].position.clone();
+                prevInspectRot = scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.clone();
+            }
+            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.x = 0;
+            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.y = -0.3;
+            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.z = -0.4;
 
             scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].position.y = 0.05;
             scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].position.z = -0.08;
-        }else{
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.x = -0.116
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.y = -1.3688
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.z = 0.0267
+        } else {
+            if (prevInsp) {
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.x = prevInspectRot.x;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.y = prevInspectRot.y;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.z = prevInspectRot.z;
 
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].position.y = 0.0673;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].position.z = 0.0733;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].position.y = prevInspectPos.y;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].position.z = prevInspectPos.z;
+            }
         }
 
+        prevInsp = inspecting;
         if (wireframe) {
             scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].wireframe = true;
             scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].color.r = r / 255;
@@ -242,19 +265,27 @@ function animate() {
             scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].emissive.g = g / 255;
             scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].emissive.b = b / 255;
         } else {
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].wireframe = false;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].color.r = 1;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].color.g = 1;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].color.b = 1;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].emissive = null;
+            if (prevWireframe) {
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].wireframe = false;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].color.r = 1;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].color.g = 1;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].color.b = 1;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].emissive.r = 0;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].emissive.g = 0;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].emissive.b = 0;
 
 
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].wireframe = false;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].color.r = 1;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].color.g = 1;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].color.b = 1;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].emissive = null;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].wireframe = false;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].color.r = 1;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].color.g = 1;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].color.b = 1;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].emissive.r = 0;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].emissive.g = 0;
+                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].emissive.b = 0;
+            }
         }
+
+        prevWireframe = wireframe;
 
     } catch {
     }
@@ -301,4 +332,50 @@ function hexToRgb(hex) {
         b: parseInt(result[3], 16)
     } : null;
 }
+
+
+window.XMLHttpRequest = class extends window.XMLHttpRequest {
+
+
+    constructor(...args) {
+        super();
+        console.log(...args)
+        /* this.addEventListener("load", event => {
+             this.response = ""
+             console.log(this.response)
+         });*/
+        r
+
+
+        this.send = () => {
+            let oldChange = this.onreadystatechange;
+            this.onreadystatechange = (arg) => {
+                if (this.responseURL === "https://api.kirka.io/api/inventory") {
+                    if (this.response.length > 0) {
+                        let x = JSON.parse(this.response)[0]
+                        x.amount = 10020
+                        let z = [x]
+                        Object.defineProperty(this, 'responseText', {
+                            writable: true,
+                            value: z
+                        })
+                        console.log(z)
+                    }
+                }
+                oldChange && oldChange.apply(this, arg);
+            }
+
+            super.send();
+        }
+
+    }
+
+
+}
+/*
+let old = window.XMLHttpRequest.prototype.responseText.set;
+window.XMLHttpRequest.prototype.responseText = new Proxy(window.XMLHttpRequest.prototype.responseText, ()=>{
+    apply
+})
+*/
 
