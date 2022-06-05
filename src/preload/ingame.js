@@ -1,21 +1,24 @@
 const {clipboard} = require('electron');
 
-let permCrosshair = true;
+let permCrosshair = false;
 let noLoadingTimes = true;
-let customCss = false;
+let customCss = true;
 let hpNumber = true;
 let hideWeaponsAds = true;
 let hideArms = false;
 let playerHighLight = true;
 let fullBlack = false;
-let wireframe = false;
+let wireframe = true;
 let prevWireframe = false;
-let rainbow = false;
+let rainbow = true;
 
 let inspecting = false;
 let prevInsp = false;
 let prevInspectPos;
 let prevInspectRot;
+
+let gui = document.createElement("div");
+let menuVisible = false;
 
 let scene;
 
@@ -39,19 +42,8 @@ new MutationObserver(mutationRecords => {
             record.addedNodes.forEach(el => {
                 if (el.classList?.contains("loading-scene") && noLoadingTimes) el.parentNode.removeChild(el);
                 if (el.id === "cmpPersistentLink") el.parentNode.removeChild(el);
-                if (el.classList?.contains("settings")) {
-
-                    let elem = document.createElement('div');
-                    elem.classList.add("text-2", "tab");
-                    elem.innerText = "Client";
-                    elem.dataset.vC835fc7a = "";
-
-                    document.getElementsByClassName("tabs")[0].appendChild(elem);
-                }
                 if (el.classList?.contains("moneys")) {
                     let btn = document.createElement("button");
-                    btn.classList.add("animation");
-
 
                     btn.style = "background-color: var(--primary-1);\n" +
                         "    --hover-color: var(--primary-2);\n" +
@@ -78,7 +70,7 @@ new MutationObserver(mutationRecords => {
                         "    box-shadow: 0 0.15rem 0 rgba(0,0,0,.315);\n" +
                         "    cursor: pointer;" +
                         "    box-shadow: 0 5.47651px 0 rgba(0,0,0,.5)!important;\n" +
-                        "    text-shadow: -1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 3px 1px rgba(0,0,0,.486)!important;" +
+                        "    text-shadow: -1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 1px 1px rgba(0,0,0,.486)!important;" +
                         "    width: 150px;" +
                         "    height: 50px;" +
                         "    bottom: 0px;" +
@@ -134,6 +126,172 @@ document.addEventListener("DOMContentLoaded", () => {
         document.head.append(cssLinkElem);
     }
 
+
+    gui.id = "gui";
+
+    gui.innerHTML += "<style>\n" +
+        "        @import url('https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300&display=swap');\n" +
+        "\n" +
+        "        #gui {\n" +
+        "            background-color: rgba(0, 0, 0, 0.5);\n" +
+        "            border: solid rgb(0, 0, 0) 4px;\n" +
+        "            box-shadow: 3px 3px #ff9900;\n" +
+        "            position: absolute;\n" +
+        "            left: 200px;\n" +
+        "            top: 200px;\n" +
+        "            z-index: 300;\n" +
+        "            color: rgb(255, 255, 255);\n" +
+        "            padding: 6px;\n" +
+        "            font-family: \"Titillium Web\", serif;\n" +
+        "            line-height: 1.6;\n" +
+        "        }\n" +
+        "\n" +
+        "        input:disabled {\n" +
+        "            background: rgb(255, 255, 255);\n" +
+        "            border: solid rgb(0, 0, 0) 1px;\n" +
+        "            width: 50px;\n" +
+        "        }\n" +
+        "\n" +
+        "        .heading {\n" +
+        "            width: 300px;\n" +
+        "            height: 35px;\n" +
+        "            display: flex;\n" +
+        "            justify-content: center;\n" +
+        "            align-items: center;\n" +
+        "            background: rgba(0, 0, 0);\n" +
+        "            margin: -9px -6px 8px;\n" +
+        "            font-family: \"Titillium Web\", serif;\n" +
+        "            font-weight: bold;\n" +
+        "            text-align: center;\n" +
+        "            font-size: 24px;\n" +
+        "            text-shadow: 1px 1px #ff9900;\n" +
+        "        }\n" +
+        "\n" +
+        "        .footer {\n" +
+        "            width: 300px;\n" +
+        "            height: 20px;\n" +
+        "            display: flex;\n" +
+        "            justify-content: center;\n" +
+        "            align-items: center;\n" +
+        "            background: rgba(0, 0, 0);\n" +
+        "            margin: 6px -6px -10px;\n" +
+        "            font-family: \"Titillium Web\", serif;\n" +
+        "            font-weight: bold;\n" +
+        "            text-align: center;\n" +
+        "            font-size: 11px;\n" +
+        "            position: relative;\n" +
+        "            text-shadow: 1px 1px #ff9900;\n" +
+        "        }\n" +
+        "\n" +
+        "        .module:hover {\n" +
+        "            background-color: rgb(0, 0, 0, 0.1)\n" +
+        "        }\n" +
+        "\n" +
+        "\n" +
+        "    </style>\n" +
+        "    <div id=\"infi\" class=\"heading\">Client Settings</div>\n" +
+        "\n" +
+        "    <div class=\"module\">\n" +
+        "        <input type=\"checkbox\" id=\"crosshair\" name=\"crosshair\">\n" +
+        "        <label for=\"crosshair\">Perm. Crosshair</label>\n" +
+        "    </div>\n" +
+        "\n" +
+        "    <div class=\"module\">\n" +
+        "        <input type=\"checkbox\" id=\"customCSS\" name=\"customCSS\">\n" +
+        "        <label for=\"customCSS\">CSS Link: </label>\n" +
+        "        <input type=\"text\" id=\"texts\" onchange=\"\">\n" +
+        "    </div>\n" +
+        "\n" +
+        "    <div class=\"module\">\n" +
+        "        <input type=\"checkbox\" id=\"hideweap\" name=\"hideweap\">\n" +
+        "        <label for=\"hideweap\">Hide Weapon ADS</label>\n" +
+        "    </div>\n" +
+        "\n" +
+        "    <div class=\"module\">\n" +
+        "        <input type=\"checkbox\" id=\"arms\" name=\"arms\">\n" +
+        "        <label for=\"arms\">Hide Arms</label>\n" +
+        "    </div>\n" +
+        "\n" +
+        "    <div class=\"module\">\n" +
+        "        <input type=\"checkbox\" id=\"highlight\" name=\"highlight\">\n" +
+        "        <label for=\"highlight\">Highlight Players</label>\n" +
+        "    </div>\n" +
+        "\n" +
+        "    <div class=\"module\">\n" +
+        "        <input type=\"checkbox\" id=\"black\" name=\"black\">\n" +
+        "        <label for=\"black\">Black Players</label>\n" +
+        "    </div>\n" +
+        "\n" +
+        "    <div class=\"module\">\n" +
+        "        <input type=\"checkbox\" id=\"wireframe\" name=\"wireframe\">\n" +
+        "        <label for=\"wireframe\">Wireframe Models</label>\n" +
+        "    </div>\n" +
+        "\n" +
+        "    <div class=\"module\">\n" +
+        "        <input type=\"checkbox\" id=\"rainbow\" name=\"rainbow\">\n" +
+        "        <label for=\"rainbow\">Rainbow Colors</label>\n" +
+        "    </div>\n" +
+        "\n" +
+        "    <div class=\"module\">\n" +
+        "        Inspect Key <button style=\"width: 100px\">click to bind</button>\n" +
+        "    </div>\n" +
+        "\n" +
+        "\n" +
+        "    <div class=\"footer\">Toggle With \"PageUp\" Key</div>";
+
+
+    gui.onclick = (e) => {
+
+
+        if (e.target.id === "crosshair") {
+            permCrosshair = e.target.checked;
+        }
+
+        if (e.target.id === "customCSS") {
+            customCss = e.target.checked;
+        }
+
+        if (e.target.id === "hideweap") {
+            hideWeaponsAds = e.target.checked;
+        }
+
+        if (e.target.id === "arms") {
+            hideArms = e.target.checked;
+        }
+
+        if (e.target.id === "highlight") {
+            playerHighLight = e.target.checked;
+        }
+
+        if (e.target.id === "black") {
+            fullBlack = e.target.checked;
+        }
+
+        if (e.target.id === "wireframe") {
+            wireframe = e.target.checked;
+        }
+
+        if (e.target.id === "rainbow") {
+            rainbow = e.target.checked;
+        }
+
+    };
+
+    document.body.appendChild(gui);
+
+
+    document.getElementById("crosshair").checked = permCrosshair;
+    document.getElementById("customCSS").checked = customCss;
+    document.getElementById("hideweap").checked = hideWeaponsAds;
+    document.getElementById("arms").checked = hideArms;
+    document.getElementById("highlight").checked = playerHighLight;
+    document.getElementById("black").checked = fullBlack;
+    document.getElementById("wireframe").checked = wireframe;
+    document.getElementById("rainbow").checked = rainbow;
+
+
+    gui.style.display = "none";
+
 });
 
 
@@ -164,8 +322,8 @@ document.addEventListener('keydown', (e) => {
         inspecting = true;
     }
 
-    if (e.key === 'k') {
-        wireframe = !wireframe;
+    if (e.keyCode === 33) {
+        toggleGui();
     }
 });
 
@@ -323,17 +481,6 @@ function animate() {
 
 animate();
 
-
-function hexToRgb(hex) {
-    let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
-}
-
-
 window.XMLHttpRequest = class extends window.XMLHttpRequest {
 
     constructor() {
@@ -344,7 +491,6 @@ window.XMLHttpRequest = class extends window.XMLHttpRequest {
             this.onreadystatechange = (...args) => {
                 if (this.responseURL === "https://api.kirka.io/api/inventory") {
                     if (this.response.length > 0) {
-
                         let entries = JSON.parse(this.response);
                         let sortedItems = {legendary: [], epic: [], rare: [], common: []};
 
@@ -372,4 +518,25 @@ window.XMLHttpRequest = class extends window.XMLHttpRequest {
     }
 
 }
+
+function hexToRgb(hex) {
+    let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
+function toggleGui() {
+    menuVisible = !menuVisible;
+    if (menuVisible) {
+        document.exitPointerLock();
+        gui.style.display = 'inline-block';
+    } else {
+        gui.style.display = 'none';
+    }
+}
+
+
 
