@@ -336,46 +336,40 @@ function hexToRgb(hex) {
 
 window.XMLHttpRequest = class extends window.XMLHttpRequest {
 
-
-    constructor(...args) {
+    constructor() {
         super();
-        console.log(...args)
-        /* this.addEventListener("load", event => {
-             this.response = ""
-             console.log(this.response)
-         });*/
-        r
 
-
-        this.send = () => {
+        this.send = (...sendArgs) => {
             let oldChange = this.onreadystatechange;
-            this.onreadystatechange = (arg) => {
+            this.onreadystatechange = (...args) => {
                 if (this.responseURL === "https://api.kirka.io/api/inventory") {
                     if (this.response.length > 0) {
-                        let x = JSON.parse(this.response)[0]
-                        x.amount = 10020
-                        let z = [x]
+
+                        let entries = JSON.parse(this.response);
+                        let sortedItems = {legendary: [], epic: [], rare: [], common: []};
+
+                        for (let entry of entries) {
+                            sortedItems[entry.item.rarity.toLowerCase()].push(entry);
+                        }
+
+                        let editEntries = [];
+                        for (let rarity in sortedItems) {
+                            editEntries = [].concat(editEntries, sortedItems[rarity]);
+                        }
+
                         Object.defineProperty(this, 'responseText', {
                             writable: true,
-                            value: z
-                        })
-                        console.log(z)
+                            value: editEntries
+                        });
                     }
                 }
-                oldChange && oldChange.apply(this, arg);
-            }
+                oldChange && oldChange.apply(this, ...args);
+            };
 
-            super.send();
-        }
+            super.send(...sendArgs);
+        };
 
     }
 
-
 }
-/*
-let old = window.XMLHttpRequest.prototype.responseText.set;
-window.XMLHttpRequest.prototype.responseText = new Proxy(window.XMLHttpRequest.prototype.responseText, ()=>{
-    apply
-})
-*/
 
