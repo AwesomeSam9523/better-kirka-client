@@ -31,7 +31,7 @@ A simple, yet performance-optimized and feature-rich kirka client
 - Inspect Weapon
 
 - Join Link Button
-- RGB Wireframe Models
+- RGB Wireframe Main Models
 
 
 
