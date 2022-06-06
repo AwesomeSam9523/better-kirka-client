@@ -1,16 +1,16 @@
-#Better-Kirka-Client
+# Better-Kirka-Client
 
 A simple, yet performance-optimized and feature-rich kirka client
 
 
-###This client features:
+### This client features:
 
 • **Highly stable and outstanding performance\
 • Constructive to the community (open source under [AGPL-3.0](https://github.com/42infi/better-kirka-client/blob/master/LICENCE)) \
 • Advanced Features (including custom userscripts and additional game features)**
 
 
-##Features
+## Features
 
 - No Ads
 - Better Inventory
@@ -30,7 +30,7 @@ A simple, yet performance-optimized and feature-rich kirka client
 
 
 
-##Compared to Offical Kirka Client
+## Compared to Offical Kirka Client
 
 | **Features**         | **Better-Kirka-Client**             | **Official Kirka Client**                      |
 |----------------------|-------------------------------------|------------------------------------------------|
@@ -45,7 +45,7 @@ A simple, yet performance-optimized and feature-rich kirka client
 | User Friendly        | ✅                                   | ❌                                              |
 | Open Source          | ✅                                   | ❌                                              |
 
-##Keybinds
+## Keybinds
 
 | **Key** | **Action**               |
 |---------|--------------------------|
@@ -54,5 +54,5 @@ A simple, yet performance-optimized and feature-rich kirka client
 | F11     | Fullscreen               |
 | F12     | Open Dev Tools           |
 
-##Download here:
+## Download here:
 • link
