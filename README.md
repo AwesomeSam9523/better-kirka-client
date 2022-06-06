@@ -13,7 +13,7 @@ A simple, yet performance-optimized and feature-rich kirka client
   
 
 ## Userscripts
-- You can put your own .js files in the folder at "Documents\BetterKirkaClient\scripts" and they will execute on webpage load
+- You can put your own .js files in the folder at "\Documents\BetterKirkaClient\scripts" and they will execute on webpage load
 
 ## Features
 
