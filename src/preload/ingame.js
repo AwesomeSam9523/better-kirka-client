@@ -1,24 +1,44 @@
-const {clipboard} = require('electron');
+const {clipboard, ipcRenderer} = require('electron');
+const fs = require('fs');
+const path = require('path');
+const Store = require('electron-store');
 
-let permCrosshair = false;
+const settings = new Store();
+
+const documents = ipcRenderer.sendSync('docs');
+let scriptFolder = documents + "\\BetterKirkaClient\\scripts";
+
+if (!fs.existsSync(scriptFolder)) {
+    fs.mkdirSync(scriptFolder, {recursive: true});
+}
+
+fs.readdirSync(scriptFolder).filter(file => path.extname(file).toLowerCase() === '.js').forEach(filename => {
+    require(`${scriptFolder}/${filename}`);
+});
+
+let permCrosshair = !!settings.get('permCrosshair');
 let noLoadingTimes = true;
-let customCss = true;
+let customCss = !!settings.get('customCss');
 let hpNumber = true;
-let hideWeaponsAds = true;
-let hideArms = false;
-let playerHighLight = true;
-let fullBlack = false;
-let wireframe = true;
-let prevWireframe = false;
-let rainbow = true;
+let hideWeaponsAds = !!settings.get('hideWeaponsAds');
+let hideArms = !!settings.get('hideArms');
+let playerHighLight = !!settings.get('playerHighLight');
+let fullBlack = !!settings.get('fullBlack');
+let wireframe = !!settings.get('wireframe');
+let rainbow = !!settings.get('rainbow');
 
 let inspecting = false;
 let prevInsp = false;
 let prevInspectPos;
 let prevInspectRot;
 
+let prevWireframe = false;
+
 let gui = document.createElement("div");
 let menuVisible = false;
+
+let listening = false;
+if (!settings.get('inspectKey')) settings.set('inspectKey', "j");
 
 let scene;
 
@@ -43,6 +63,12 @@ new MutationObserver(mutationRecords => {
                 if (el.classList?.contains("loading-scene") && noLoadingTimes) el.parentNode.removeChild(el);
                 if (el.id === "cmpPersistentLink") el.parentNode.removeChild(el);
                 if (el.classList?.contains("moneys")) {
+
+                    let txt = document.createElement("div");
+                    txt.innerText = "Client Settings: PageUp"
+                    txt.style = "position: absolute; top: 185px; left: 10px; font-size: 20px; color:#ff9900;";
+                    el.appendChild(txt)
+
                     let btn = document.createElement("button");
 
                     btn.style = "background-color: var(--primary-1);\n" +
@@ -121,11 +147,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (customCss) {
         let cssLinkElem = document.createElement("link");
-        cssLinkElem.href = "https://cdn.discordapp.com/attachments/738010330780926004/955078958918033438/Titans.css";
+        cssLinkElem.href = settings.get('cssLink');
         cssLinkElem.rel = "stylesheet";
         document.head.append(cssLinkElem);
     }
-
 
     gui.id = "gui";
 
@@ -138,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "            box-shadow: 3px 3px #ff9900;\n" +
         "            position: absolute;\n" +
         "            left: 200px;\n" +
-        "            top: 200px;\n" +
+        "            top: 280px;\n" +
         "            z-index: 300;\n" +
         "            color: rgb(255, 255, 255);\n" +
         "            padding: 6px;\n" +
@@ -199,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "    <div class=\"module\">\n" +
         "        <input type=\"checkbox\" id=\"customCSS\" name=\"customCSS\">\n" +
         "        <label for=\"customCSS\">CSS Link: </label>\n" +
-        "        <input type=\"text\" id=\"texts\" onchange=\"\">\n" +
+        "        <input type=\"text\" id=\"cssLink\" placeholder='Paste Css Link Here'>\n" +
         "    </div>\n" +
         "\n" +
         "    <div class=\"module\">\n" +
@@ -233,7 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "    </div>\n" +
         "\n" +
         "    <div class=\"module\">\n" +
-        "        Inspect Key <button style=\"width: 100px\">click to bind</button>\n" +
+        "        Inspect Key <button id='bindButton' style=\"width: 100px\">click to bind</button>\n" +
         "    </div>\n" +
         "\n" +
         "\n" +
@@ -242,43 +267,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
     gui.onclick = (e) => {
 
-
         if (e.target.id === "crosshair") {
             permCrosshair = e.target.checked;
+            settings.set('permCrosshair', permCrosshair);
         }
 
         if (e.target.id === "customCSS") {
             customCss = e.target.checked;
+            settings.set('customCss', customCss);
         }
 
         if (e.target.id === "hideweap") {
             hideWeaponsAds = e.target.checked;
+            settings.set('hideWeaponsAds', hideWeaponsAds);
         }
 
         if (e.target.id === "arms") {
             hideArms = e.target.checked;
+            settings.set('hideArms', hideArms);
         }
 
         if (e.target.id === "highlight") {
             playerHighLight = e.target.checked;
+            settings.set('playerHighLight', playerHighLight);
         }
 
         if (e.target.id === "black") {
             fullBlack = e.target.checked;
+            settings.set('fullBlack', fullBlack);
         }
 
         if (e.target.id === "wireframe") {
             wireframe = e.target.checked;
+            settings.set('wireframe', wireframe);
         }
 
         if (e.target.id === "rainbow") {
             rainbow = e.target.checked;
+            settings.set('rainbow', rainbow);
         }
 
     };
 
+    gui.style.display = "none";
+
     document.body.appendChild(gui);
 
+    if (settings.get('menuOpen') === undefined || settings.get('menuOpen')) {
+        toggleGui();
+    }
 
     document.getElementById("crosshair").checked = permCrosshair;
     document.getElementById("customCSS").checked = customCss;
@@ -289,17 +326,31 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("wireframe").checked = wireframe;
     document.getElementById("rainbow").checked = rainbow;
 
+    let button = document.getElementById("bindButton");
+    button.style.fontWeight = "800";
+    button.onclick = () => {
+        listening = true;
+        button.innerText = "Press a Key"
+    }
 
-    gui.style.display = "none";
+    button.innerText = settings.get('inspectKey').toUpperCase();
+
+    let cssField = document.getElementById('cssLink');
+
+    if (settings.get('cssLink') === undefined) settings.set('cssLink', '');
+
+    cssField.value = settings.get('cssLink');
+
+    cssField.oninput = () => {
+        settings.set('cssLink', cssField.value);
+    }
 
 });
-
 
 window.addEventListener("mouseup", (e) => {
     if (e.button === 3 || e.button === 4)
         e.preventDefault();
 });
-
 
 const observer = new MutationObserver(function (mutations) {
     mutations.forEach(function (mutation) {
@@ -310,27 +361,32 @@ const observer = new MutationObserver(function (mutations) {
 let scoped = false;
 
 document.addEventListener('mousedown', (e) => {
-    if (e.button === 2) scoped = true
+    if (e.button === 2) scoped = true;
 });
 
 document.addEventListener('mouseup', (e) => {
-    if (e.button === 2) scoped = false
+    if (e.button === 2) scoped = false;
 });
 
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'j') {
-        inspecting = true;
+
+    if (listening) {
+        settings.set('inspectKey', e.key);
+        document.getElementById("bindButton").innerText = e.key.toUpperCase();
+        listening = false;
     }
 
-    if (e.keyCode === 33) {
+    if (e.key === settings.get("inspectKey").toLowerCase()) {
+        inspecting = true;
+        setTimeout(() => {
+            inspecting = false
+        }, 3000);
+    }
+
+    if (e.code === "PageUp") {
         toggleGui();
     }
-});
 
-document.addEventListener('keyup', (e) => {
-    if (e.key === 'j') {
-        inspecting = false;
-    }
 });
 
 let r = 255;
@@ -359,11 +415,7 @@ function animate() {
         b = color.b;
     }
 
-    if (crosshair && permCrosshair) {
-        crosshair.style.setProperty('visibility', 'visible', 'important');
-        crosshair.style.setProperty('opacity', '1', 'important');
-        crosshair.style.setProperty('display', 'block', 'important');
-    }
+    if (crosshair && permCrosshair) crosshair.style = "visibility: visible !important; opacity: 1 !important; display: block !important;"
 
     try {
 
@@ -379,67 +431,73 @@ function animate() {
             arms = false;
         }
 
-        scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"]["visible"] = arms;
+        const weaponModel = scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"];
+        const armsMaterial = weaponModel["parent"]["children"]["0"]["material"];
+        const weaponMaterial = weaponModel["children"][num]["material"];
 
-        if (hideWeaponsAds) scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"]["visible"] = !scoped;
+        armsMaterial.visible = arms;
+
+        if (hideWeaponsAds) weaponMaterial.visible = !scoped;
+
 
         if (inspecting) {
             if (!prevInsp) {
-                prevInspectPos = scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].position.clone();
-                prevInspectRot = scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.clone();
+                prevInspectPos = weaponModel.position.clone();
+                prevInspectRot = weaponModel.rotation.clone();
             }
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.x = 0;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.y = -0.3;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.z = -0.4;
+            weaponModel.rotation.x = 0;
+            weaponModel.rotation.y = -0.3;
+            weaponModel.rotation.z = -0.4;
 
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].position.y = 0.05;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].position.z = -0.08;
+            weaponModel.position.y = 0.05;
+            weaponModel.position.z = -0.08;
         } else {
             if (prevInsp) {
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.x = prevInspectRot.x;
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.y = prevInspectRot.y;
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].rotation.z = prevInspectRot.z;
+                weaponModel.rotation.x = prevInspectRot.x;
+                weaponModel.rotation.y = prevInspectRot.y;
+                weaponModel.rotation.z = prevInspectRot.z;
 
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].position.y = prevInspectPos.y;
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"].position.z = prevInspectPos.z;
+                weaponModel.position.y = prevInspectPos.y;
+                weaponModel.position.z = prevInspectPos.z;
             }
         }
 
         prevInsp = inspecting;
-        if (wireframe) {
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].wireframe = true;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].color.r = r / 255;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].color.g = g / 255;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].color.b = b / 255;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].emissive.r = r / 255;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].emissive.g = g / 255;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].emissive.b = b / 255;
 
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].wireframe = true;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].color.r = r / 255;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].color.g = g / 255;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].color.b = b / 255;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].emissive.r = r / 255;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].emissive.g = g / 255;
-            scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].emissive.b = b / 255;
+        if (wireframe) {
+            armsMaterial.wireframe = true;
+            armsMaterial.color.r = r / 255;
+            armsMaterial.color.g = g / 255;
+            armsMaterial.color.b = b / 255;
+            armsMaterial.emissive.r = r / 255;
+            armsMaterial.emissive.g = g / 255;
+            armsMaterial.emissive.b = b / 255;
+
+            weaponMaterial.wireframe = true;
+            weaponMaterial.color.r = r / 255;
+            weaponMaterial.color.g = g / 255;
+            weaponMaterial.color.b = b / 255;
+            weaponMaterial.emissive.r = r / 255;
+            weaponMaterial.emissive.g = g / 255;
+            weaponMaterial.emissive.b = b / 255;
         } else {
             if (prevWireframe) {
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].wireframe = false;
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].color.r = 1;
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].color.g = 1;
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].color.b = 1;
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].emissive.r = 0;
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].emissive.g = 0;
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["parent"]["children"]["0"]["material"].emissive.b = 0;
+                armsMaterial.wireframe = false;
+                armsMaterial.color.r = 1;
+                armsMaterial.color.g = 1;
+                armsMaterial.color.b = 1;
+                armsMaterial.emissive.r = 0;
+                armsMaterial.emissive.g = 0;
+                armsMaterial.emissive.b = 0;
 
 
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].wireframe = false;
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].color.r = 1;
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].color.g = 1;
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].color.b = 1;
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].emissive.r = 0;
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].emissive.g = 0;
-                scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["35"]["weapons"][weap]["model"]["children"][num]["material"].emissive.b = 0;
+                weaponMaterial.wireframe = false;
+                weaponMaterial.color.r = 1;
+                weaponMaterial.color.g = 1;
+                weaponMaterial.color.b = 1;
+                weaponMaterial.emissive.r = 0;
+                weaponMaterial.emissive.g = 0;
+                weaponMaterial.emissive.b = 0;
             }
         }
 
@@ -452,15 +510,15 @@ function animate() {
 
             let localPlayerClass = scene["children"]["0"]["parent"]["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["0"]["_queries"]["player"]["entities"]["0"]["_components"]["38"].wnWmN;
             let player = scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["2"]["_queries"]["animationEntities"]["entities"][i]["_components"];
-            let mat = scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["2"]["_queries"]["animationEntities"]["entities"][i]._components[0].value.children[0].children[0].children[1].material;
+            let mat = scene["entity"]["_entityManager"]["mWnwM"]["systemManager"]["_systems"]["2"]["_queries"]["animationEntities"]["entities"][i]["_components"][0].value.children[0].children[0].children[1].material;
 
             if ((mat.color.r === 1 && mat.color.g < 1 && mat.color.b < 1) || !playerHighLight) continue;
 
             let color = hexToRgb("#0000ff");
             if (!localPlayerClass.team || localPlayerClass.team !== player["50"].team) {
                 color = hexToRgb("#ff0000");
+                if (fullBlack) color = hexToRgb('#000000')
             }
-            if (fullBlack) color = hexToRgb('#000000')
 
             let r = color.r * Number.MAX_SAFE_INTEGER;
             let g = color.g * Number.MAX_SAFE_INTEGER;
@@ -481,7 +539,7 @@ function animate() {
 
 animate();
 
-window.XMLHttpRequest = class extends window.XMLHttpRequest {
+XMLHttpRequest = class extends XMLHttpRequest {
 
     constructor() {
         super();
@@ -519,15 +577,6 @@ window.XMLHttpRequest = class extends window.XMLHttpRequest {
 
 }
 
-function hexToRgb(hex) {
-    let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
-}
-
 function toggleGui() {
     menuVisible = !menuVisible;
     if (menuVisible) {
@@ -536,7 +585,14 @@ function toggleGui() {
     } else {
         gui.style.display = 'none';
     }
+    settings.set('menuOpen', menuVisible);
 }
 
-
-
+function hexToRgb(hex) {
+    let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
