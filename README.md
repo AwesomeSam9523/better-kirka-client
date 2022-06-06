@@ -5,10 +5,15 @@ A simple, yet performance-optimized and feature-rich kirka client
 
 ### This client features:
 
-• **Highly stable and outstanding performance\
-• Constructive to the community (open source under [AGPL-3.0](https://github.com/42infi/better-kirka-client/blob/master/LICENCE)) \
-• Advanced Features (including custom userscripts and additional game features)**
 
+- Highly stable and outstanding performance <br/>
+- Constructive to the community (open source under [AGPL-3.0](https://github.com/42infi/better-kirka-client/blob/master/LICENCE)) <br/>
+- Advanced Features (including additional game features) 
+- Userscripts
+  
+
+## Userscripts
+- You can put your own .js files in the folder at "Documents\BetterKirkaClient\scripts" and they will execute on webpage load
 
 ## Features
 
@@ -53,6 +58,7 @@ A simple, yet performance-optimized and feature-rich kirka client
 | F6      | Open link from clipboard |
 | F11     | Fullscreen               |
 | F12     | Open Dev Tools           |
+| PageUp  | Toggle Client Settings   |
 
 ## Download here:
-• link
+• [Download version 1.5.4](https://github.com/42infi/better-kirka-client/releases/tag/1.5.4)

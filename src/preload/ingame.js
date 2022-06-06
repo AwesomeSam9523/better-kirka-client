@@ -62,8 +62,8 @@ new MutationObserver(mutationRecords => {
             record.addedNodes.forEach(el => {
                 if (el.classList?.contains("loading-scene") && noLoadingTimes) el.parentNode.removeChild(el);
                 if (el.id === "cmpPersistentLink") el.parentNode.removeChild(el);
+                if (el.id === "qc-cmp2-container") el.parentNode.removeChild(el);
                 if (el.classList?.contains("moneys")) {
-
                     let txt = document.createElement("div");
                     txt.innerText = "Client Settings: PageUp"
                     txt.style = "position: absolute; top: 185px; left: 10px; font-size: 20px; color:#ff9900;";
@@ -155,20 +155,19 @@ document.addEventListener("DOMContentLoaded", () => {
     gui.id = "gui";
 
     gui.innerHTML += "<style>\n" +
-        "        @import url('https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300&display=swap');\n" +
-        "\n" +
         "        #gui {\n" +
-        "            background-color: rgba(0, 0, 0, 0.5);\n" +
-        "            border: solid rgb(0, 0, 0) 4px;\n" +
-        "            box-shadow: 3px 3px #ff9900;\n" +
+        "            background-color: rgb(24,25,28);\n" +
+        "            border: solid rgb(24,25,28) 5px;\n" +
+        "            box-shadow: 0 0 8px 2px #000000;\n" +
         "            position: absolute;\n" +
         "            left: 200px;\n" +
-        "            top: 280px;\n" +
+        "            top: 260px;\n" +
         "            z-index: 300;\n" +
         "            color: rgb(255, 255, 255);\n" +
         "            padding: 6px;\n" +
-        "            font-family: \"Titillium Web\", serif;\n" +
+        "            font-family: -apple-system, BlinkMacSystemFont, sans-serif;\n" +
         "            line-height: 1.6;\n" +
+        "            border-radius: 3px" +
         "        }\n" +
         "\n" +
         "        input:disabled {\n" +
@@ -179,17 +178,17 @@ document.addEventListener("DOMContentLoaded", () => {
         "\n" +
         "        .heading {\n" +
         "            width: 300px;\n" +
-        "            height: 35px;\n" +
+        "            height: 40px;\n" +
         "            display: flex;\n" +
         "            justify-content: center;\n" +
         "            align-items: center;\n" +
-        "            background: rgba(0, 0, 0);\n" +
+        "            background-color: rgb(24,25,28);\n" +
         "            margin: -9px -6px 8px;\n" +
         "            font-family: \"Titillium Web\", serif;\n" +
         "            font-weight: bold;\n" +
         "            text-align: center;\n" +
         "            font-size: 24px;\n" +
-        "            text-shadow: 1px 1px #ff9900;\n" +
+        "            border-bottom: solid rgb(140,140,140) 2px;" +
         "        }\n" +
         "\n" +
         "        .footer {\n" +
@@ -198,14 +197,14 @@ document.addEventListener("DOMContentLoaded", () => {
         "            display: flex;\n" +
         "            justify-content: center;\n" +
         "            align-items: center;\n" +
-        "            background: rgba(0, 0, 0);\n" +
+        "            background-color: rgb(24,25,28);\n" +
         "            margin: 6px -6px -10px;\n" +
         "            font-family: \"Titillium Web\", serif;\n" +
         "            font-weight: bold;\n" +
         "            text-align: center;\n" +
         "            font-size: 11px;\n" +
         "            position: relative;\n" +
-        "            text-shadow: 1px 1px #ff9900;\n" +
+        "            border-top: solid rgb(140,140,140) 2px;" +
         "        }\n" +
         "\n" +
         "        .module:hover {\n" +
@@ -224,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "    <div class=\"module\">\n" +
         "        <input type=\"checkbox\" id=\"customCSS\" name=\"customCSS\">\n" +
         "        <label for=\"customCSS\">CSS Link: </label>\n" +
-        "        <input type=\"text\" id=\"cssLink\" placeholder='Paste Css Link Here'>\n" +
+        "        <input type=\"text\" id=\"cssLink\" placeholder='Paste CSS Link Here'>\n" +
         "    </div>\n" +
         "\n" +
         "    <div class=\"module\">\n" +
@@ -427,7 +426,7 @@ function animate() {
         if (weap === "AR-9") num = 3;
 
         let arms = true;
-        if ((scoped && hideWeaponsAds) || hideArms || inspecting) {
+        if ((scoped && hideWeaponsAds) || hideArms) {
             arms = false;
         }
 
