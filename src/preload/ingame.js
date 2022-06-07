@@ -155,6 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
     gui.id = "gui";
 
     gui.innerHTML += "<style>\n" +
+        "       @import url('https://fonts.googleapis.com/css2?family=Titillium+Web:wght@300&display=swap');" +
         "        #gui {\n" +
         "            background-color: rgb(24,25,28);\n" +
         "            border: solid rgb(24,25,28) 5px;\n" +
@@ -165,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "            z-index: 300;\n" +
         "            color: rgb(255, 255, 255);\n" +
         "            padding: 6px;\n" +
-        "            font-family: -apple-system, BlinkMacSystemFont, sans-serif;\n" +
+        "            font-family: \"Titillium Web\", serif;\n" +
         "            line-height: 1.6;\n" +
         "            border-radius: 3px" +
         "        }\n" +
