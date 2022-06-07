@@ -1,7 +1,7 @@
 const {app, BrowserWindow, clipboard, ipcMain} = require('electron');
 const shortcuts = require('electron-localshortcut');
 const Store = require('electron-store');
-const { autoUpdater } = require('electron-updater');
+const {autoUpdater} = require('electron-updater');
 
 Store.initRenderer();
 
@@ -29,7 +29,7 @@ const createWindow = () => {
     });
     win.removeMenu();
 
-    if(settings.get('fullScreen') === undefined) settings.set('fullScreen', true);
+    if (settings.get('fullScreen') === undefined) settings.set('fullScreen', true);
 
     win.setFullScreen(settings.get('fullScreen'));
 
@@ -54,9 +54,7 @@ const createWindow = () => {
         e.preventDefault();
     });
 
-    win.once('ready-to-show', ()=> {
-        autoUpdater.checkForUpdatesAndNotify();
-    });
+    autoUpdater.checkForUpdatesAndNotify();
 
     autoUpdater.on('update-downloaded', () => {
         autoUpdater.quitAndInstall();

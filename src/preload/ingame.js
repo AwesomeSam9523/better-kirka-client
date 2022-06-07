@@ -67,12 +67,13 @@ new MutationObserver(mutationRecords => {
     try {
         mutationRecords.forEach(record => {
             record.addedNodes.forEach(el => {
-                console.log(el)
                 if (el.classList?.contains("loading-scene") && noLoadingTimes) el.parentNode.removeChild(el);
                 if (el.id === "qc-cmp2-container") el.parentNode.removeChild(el);
                 if (el.id === "cmpPersistentLink" || el.classList?.contains("home")) {
 
                     let btn = document.createElement("button");
+
+                    btn.id = "clientJoinButton";
 
                     btn.style = "background-color: var(--primary-1);\n" +
                         "    --hover-color: var(--primary-2);\n" +
@@ -373,6 +374,8 @@ document.addEventListener('mouseup', (e) => {
     if (e.button === 2) scoped = false;
 });
 
+let inspectedWeapon;
+
 document.addEventListener('keydown', (e) => {
 
     if (listening) {
@@ -422,6 +425,9 @@ function animate() {
 
     if (crosshair && permCrosshair) crosshair.style = "visibility: visible !important; opacity: 1 !important; display: block !important;"
 
+
+    //just to remind you, your client has to be open source if you want to use stuff from here :)
+    //@AwesomeSam
     try {
 
         let weap = document.getElementsByClassName('list-weapons')[0].children[0].children[0].innerText;
@@ -444,11 +450,11 @@ function animate() {
 
         if (hideWeaponsAds) weaponMaterial.visible = !scoped;
 
-
         if (inspecting) {
             if (!prevInsp) {
                 prevInspectPos = weaponModel.position.clone();
                 prevInspectRot = weaponModel.rotation.clone();
+                if(weaponModel) inspectedWeapon = weaponModel;
             }
             weaponModel.rotation.x = 0;
             weaponModel.rotation.y = -0.3;
@@ -458,12 +464,12 @@ function animate() {
             weaponModel.position.z = -0.08;
         } else {
             if (prevInsp) {
-                weaponModel.rotation.x = prevInspectRot.x;
-                weaponModel.rotation.y = prevInspectRot.y;
-                weaponModel.rotation.z = prevInspectRot.z;
+                inspectedWeapon.rotation.x = prevInspectRot.x;
+                inspectedWeapon.rotation.y = prevInspectRot.y;
+                inspectedWeapon.rotation.z = prevInspectRot.z;
 
-                weaponModel.position.y = prevInspectPos.y;
-                weaponModel.position.z = prevInspectPos.z;
+                inspectedWeapon.position.y = prevInspectPos.y;
+                inspectedWeapon.position.z = prevInspectPos.z;
             }
         }
 
@@ -544,6 +550,7 @@ function animate() {
 
 animate();
 
+//just to remind you, your client has to be open source if you want to use stuff from here :)
 XMLHttpRequest = class extends XMLHttpRequest {
 
     constructor() {
