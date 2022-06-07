@@ -1,7 +1,7 @@
 {
   "name": "better-kirka-client",
   "productName": "Better Kirka Client",
-  "version": "1.5.7",
+  "version": "1.5.8",
   "description": "a better kirka client",
   "main": "src/index.js",
   "repository": {
