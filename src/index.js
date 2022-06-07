@@ -1,6 +1,7 @@
 const {app, BrowserWindow, clipboard, ipcMain} = require('electron');
 const shortcuts = require('electron-localshortcut');
 const Store = require('electron-store');
+const { autoUpdater } = require('electron-updater');
 
 Store.initRenderer();
 
@@ -51,6 +52,14 @@ const createWindow = () => {
 
     win.on('page-title-updated', (e) => {
         e.preventDefault();
+    });
+
+    win.once('ready-to-show', ()=> {
+        autoUpdater.checkForUpdatesAndNotify();
+    });
+
+    autoUpdater.on('update-downloaded', () => {
+        autoUpdater.quitAndInstall();
     });
 
 }
