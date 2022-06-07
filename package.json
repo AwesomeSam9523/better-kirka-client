@@ -1,7 +1,7 @@
 {
   "name": "better-kirka-client",
   "productName": "Better Kirka Client",
-  "version": "1.5.5",
+  "version": "1.5.7",
   "description": "a better kirka client",
   "main": "src/index.js",
   "repository": {
@@ -11,7 +11,8 @@
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --dir",
-    "build": "electron-builder build"
+    "build": "electron-builder build --win --publish never",
+    "deploy": "electron-builder build --win --publish always"
   },
   "dependencies": {
     "electron-localshortcut": "^3.2.1",

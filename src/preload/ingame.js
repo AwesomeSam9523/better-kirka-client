@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const Store = require('electron-store');
 
+console.log("auto update test")
+
 const settings = new Store();
 
 const documents = ipcRenderer.sendSync('docs');
