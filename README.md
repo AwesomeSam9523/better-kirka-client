@@ -46,7 +46,6 @@ A simple, yet performance-optimized and feature-rich kirka client
 | Dev Tools Enabled    | ✅                                   | ❌                                              |
 | Userscripts          | ✅                                   | ❌                                              |
 | Safe To Use          | ✅                                   | ❌                                              |
-| Portable             | ✅                                   | ❌                                              |
 | User Friendly        | ✅                                   | ❌                                              |
 | Open Source          | ✅                                   | ❌                                              |
 
