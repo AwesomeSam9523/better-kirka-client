@@ -3,8 +3,6 @@ const fs = require('fs');
 const path = require('path');
 const Store = require('electron-store');
 
-console.log("auto update test")
-
 const settings = new Store();
 
 const documents = ipcRenderer.sendSync('docs');
@@ -13,10 +11,17 @@ let scriptFolder = documents + "\\BetterKirkaClient\\scripts";
 if (!fs.existsSync(scriptFolder)) {
     fs.mkdirSync(scriptFolder, {recursive: true});
 }
-
-fs.readdirSync(scriptFolder).filter(file => path.extname(file).toLowerCase() === '.js').forEach(filename => {
-    require(`${scriptFolder}/${filename}`);
-});
+try {
+    fs.readdirSync(scriptFolder).filter(file => path.extname(file).toLowerCase() === '.js').forEach(filename => {
+        try {
+            require(`${scriptFolder}/${filename}`);
+        } catch (e) {
+            console.error("an error occurred while executing userscript: " + filename + " error: " + e);
+        }
+    });
+} catch (e) {
+    console.error("an error occurred while loading userscripts: " + e);
+}
 
 let permCrosshair = !!settings.get('permCrosshair');
 let noLoadingTimes = true;
@@ -62,14 +67,10 @@ new MutationObserver(mutationRecords => {
     try {
         mutationRecords.forEach(record => {
             record.addedNodes.forEach(el => {
+                console.log(el)
                 if (el.classList?.contains("loading-scene") && noLoadingTimes) el.parentNode.removeChild(el);
-                if (el.id === "cmpPersistentLink") el.parentNode.removeChild(el);
                 if (el.id === "qc-cmp2-container") el.parentNode.removeChild(el);
-                if (el.classList?.contains("moneys")) {
-                    let txt = document.createElement("div");
-                    txt.innerText = "Client Settings: PageUp"
-                    txt.style = "position: absolute; top: 185px; left: 10px; font-size: 20px; color:#ff9900;";
-                    el.appendChild(txt)
+                if (el.id === "cmpPersistentLink" || el.classList?.contains("home")) {
 
                     let btn = document.createElement("button");
 
@@ -115,9 +116,11 @@ new MutationObserver(mutationRecords => {
 
                     document.getElementsByClassName('play-content')[0].append(btn);
 
-                    document.getElementsByClassName('card-cont soc-group')[1].onclick = () => {
+                    document.getElementsByClassName('settings-and-socicons')[0].children[1].onclick = () => {
                         window.open("https://www.youtube.com/watch?v=Vmf5evAwScc");
                     };
+
+                    if (!el.classList?.contains("home")) el.parentNode.removeChild(el);
 
                 }
                 if (el.classList?.contains("game-interface")) {
