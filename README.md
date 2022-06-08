@@ -42,7 +42,7 @@ A simple, yet performance-optimized and feature-rich kirka client
 | Custom Css           | ✅                                   | ✅                                              |
 | Stable Unlimited FPS | ✅                                   | Occasionally                                   |
 | Better Inventory     | Ultra Slim <br/> (36 lines of Code) | Bulky <br/> (around 400 lines)                 |
-| Adblocker            | Ultra Slim <br/> (8 lines of Code)  | Ultra Bulky <br/> (loads a 50.000+ lines list) |
+| Adblocker            | Ultra Slim <br/> (8 lines of Code)  | Ultra Bulky <br/> (9 lines of code 🤡) |
 | Dev Tools Enabled    | ✅                                   | ❌                                              |
 | Userscripts          | ✅                                   | ❌                                              |
 | Safe To Use          | ✅                                   | ❌                                              |
